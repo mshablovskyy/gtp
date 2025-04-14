@@ -4,19 +4,28 @@ import json
 from datetime import datetime
 import filedate
 import shutil
-from difflib import SequenceMatcher
 import time
 from tqdm import tqdm
 import argparse
 
-path = "/Users/mshablovskyy/Python/gtp/Takeout"
+description = (
+    "Google Takeout Processor\n\n"
+    "This program processes Google Takeout data by analyzing files in a specified folder. "
+    "It identifies `.json` files for metadata (e.g., creation date, file name) and processes the "
+    "corresponding files accordingly.\n\n"
+    "Files without a matching `.json` file or those that cannot be located are marked as unprocessed "
+    "and copied to a separate folder for review.\n\n"
+    "Processed files are copied and modified based on their metadata, while unprocessed ones are logged.\n\n"
+    "More details can be found in the README file.\n"
+    "Git repository for this project: https://github.com/mshablovskyy/GTP.git\n"
+)
 
-def exists(path):
+def exists(path): # check if path exists
     if path:
         return os.path.exists(path)
     else: return False
 
-def checkout_dir(path, onlynew = False):
+def checkout_dir(path, onlynew = False): # check if directory exist, if not, create hew. onlynew forces to create new in any case. return is needed to give path to new repository
     if not os.path.isdir(path) and not onlynew:
         os.mkdir(path)
     elif onlynew:
@@ -30,7 +39,7 @@ def checkout_dir(path, onlynew = False):
             os.mkdir(path)
     return path
 
-def get_file_names(path):
+def get_file_names(path): # get all files from all folders inside directory given and return them in structured form
     content = os.walk(path)
     
     files = []
@@ -47,7 +56,7 @@ def get_file_names(path):
                 })
     return jsons, files
 
-def unpack_json(path):
+def unpack_json(path): # get what needed from single json file
     if exists(path):
         with open(path, "r", encoding='utf-8') as file:
             content = json.load(file)
@@ -57,7 +66,8 @@ def unpack_json(path):
     else: 
         return None
     
-def find_file(jsondata, files):
+def find_file(jsondata, files): # get full path to the file, based on it's name, which was extracted from json
+    # logic to make "title" from json be the same as name of the file
     if len(jsondata["title"]) > 51:
         name, ext = os.path.splitext(jsondata["title"])
         jsondata["title"] = f'{name[0:51-len(ext)]}{ext}'
@@ -68,15 +78,15 @@ def find_file(jsondata, files):
             name, ext = os.path.splitext(jsondata["title"])
             jsondata["title"] = f'{name}{brackets}{ext}'
     
-    filepath = [file for file in files if file["filename"] == jsondata["title"]]
+    filepath = [file for file in files if file["filename"] == jsondata["title"]] # actual search, I just look for same filenames, based on json's data
     
-    if filepath:
+    if filepath and len(filepath) == 1:
         return True, filepath[0]
     else:
         return False, {"jsonpath": jsondata["filepath"],
                        "title": jsondata["title"]}
     
-def copy_modify(file, date, copyto):
+def copy_modify(file, date, copyto): # copy and change creation and modification date of the file
     copyto = checkout_dir(os.path.join(copyto, f"Photos from {date.year}"))
     
     new_file =  os.path.join(copyto, file["filename"])
@@ -85,16 +95,16 @@ def copy_modify(file, date, copyto):
     
     return new_file
 
-def copy_unprocessed(unprocessed, saveto):
+def copy_unprocessed(unprocessed, saveto): # copy all files that were not returned during json-based search
     to_return = []
     for file in tqdm(unprocessed, desc="Copying"):
         new_file = os.path.join(saveto, checkout_dir(os.path.join(saveto, "unprocessed")), file["filename"])
         shutil.copy(file["filepath"], new_file)
         file["procpath"] = new_file
         to_return.append(file)
-    return to_return
+    return to_return # return list with all unprocessed files, with path to the copied unmodified files
 
-def savelogs(saveto, processed, unprocessed, unprocessed_jsons, endtime):
+def savelogs(saveto, processed, unprocessed, unprocessed_jsons, endtime): # save everything that was done in separate file
     with open(os.path.join(saveto, "logs.txt"), "w") as logfile:
         logfile.write(f"Processed files:\n\n")
         for file in processed:
@@ -184,7 +194,7 @@ def main(path):
     print(f"Time used: {endtime} seconds")
     print(f"\nRepository with processed files:\n{saveto}\n")
     
-def wizard():
+def wizard(): # wizard mode, if user have not given the argument before running
     print("\nYou have not give arguments needed, so now you in the Wizard setup")
     try:
         path = input("Enter path to your folder with takeouts: ")
@@ -192,10 +202,11 @@ def wizard():
     except:
         pass
     
-def parse():
-    parser = argparse.ArgumentParser(description="Google Takeout Processor")
+def parse(description): # starte point of the program, where variable "path" is being created
     
-    parser.add_argument("path", help="Path to the folder with your takeouts")
+    parser = argparse.ArgumentParser(description=description, formatter_class=argparse.RawTextHelpFormatter)
+    
+    parser.add_argument("path", help="The full path to the repository containing Takeout folders")
     
     try:
         args = parser.parse_args()
@@ -205,5 +216,6 @@ def parse():
     
     main(path)
 
-if __name__ == "__main__":
-    parse()
+
+if __name__ == "__main__": # run the program
+    parse(description)
