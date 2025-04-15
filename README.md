@@ -102,7 +102,7 @@ python3 gtp.py
 usage: gtp.py [-h] path
 gtp.py: error: the following arguments are required: path
 
-You have not give arguments needed, so now you in the Wizard setup
+You have not given arguments needed, so now you in the Wizard setup
 Enter path to your folder with takeouts: 
 ```
 

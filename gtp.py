@@ -207,7 +207,7 @@ def main(path):
     print(f"\nRepository with processed files:\n{saveto}\n")
     
 def wizard(): # wizard mode, if user have not given the argument before running
-    print("\nYou have not give arguments needed, so now you in the Wizard setup")
+    print("\nYou have not given arguments needed, so now you in the Wizard setup")
     try:
         path = input("Enter path to your folder with takeouts: ")
         return path
