@@ -106,22 +106,34 @@ def copy_unprocessed(unprocessed, saveto): # copy all files that were not return
 
 def savelogs(saveto, processed, unprocessed, unprocessed_jsons, endtime): # save everything that was done in separate file
     with open(os.path.join(saveto, "logs.txt"), "w") as logfile:
-        logfile.write(f"Processed files:\n\n")
+        if processed: # if any files were processed
+            logfile.write(f"Processed files:\n\n")
         for file in processed:
-            logfile.write(f"    {file["filename"]}:\n")
-            logfile.write(f"        base file:     {file["filepath"]}\n")
-            logfile.write(f"        modified file: {file["procpath"]}\n\n")
+            filename = file["filename"]
+            filepath = file["filepath"]
+            procpath = file["procpath"]
+            logfile.write(f"    {filename}:\n")
+            logfile.write(f"        base file:     {filepath}\n")
+            logfile.write(f"        modified file: {procpath}\n\n")
         
-        logfile.write(f"Unrocessed jsons:\n\n")
+        if unprocessed_jsons: # if any jsons were unprocessed
+            logfile.write(f"Unprocessed jsons:\n\n")
         for file in unprocessed_jsons:
-            logfile.write(f"    {file["filename"]}:\n")
-            logfile.write(f"        base file:     {file["filepath"]}\n")
-            logfile.write(f"        this json file did not find his pair among files: {file["title"]}\n\n")
+            filename = file["filename"]
+            filepath = file["filepath"]
+            title = file["title"]
+            logfile.write(f"    {filename}:\n")
+            logfile.write(f"        base file:     {filepath}\n")
+            logfile.write(f"        this json file did not find his pair among files: {title}\n\n")
         
-        logfile.write(f"Unrocessed files:\n\n")
+        if unprocessed: # if any files were unprocessed
+            logfile.write(f"Unprocessed files:\n\n")
         for file in unprocessed:
-            logfile.write(f"    {file["filename"]}:\n")
-            logfile.write(f"        base file:     {file["filepath"]}\n")
+            filename = file["filename"]
+            filepath = file["filepath"]
+            logfile.write(f"    {filename}:\n")
+            logfile.write(f"        base file:     {filepath}\n")
+            logfile.write(f"        copied file: {procpath}\n")
             logfile.write(f"        json-based search have not reached this file\n\n")
             
         logfile.write(f"Processed: {len(processed)} files\n")

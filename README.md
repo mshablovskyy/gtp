@@ -38,7 +38,7 @@ The program **copies** all processed and unprocessed files. Ensure you have suff
 
 ### 2. **Install Python and Dependencies**
 
-- Install Python (version 3.12.6 or later is preffered, because it was tested on it).
+- Install Python (version 3.9.6 or later is preffered, it was not tested on older versions).
 - Clone this repository:
 
   ```bash
@@ -54,7 +54,8 @@ The program **copies** all processed and unprocessed files. Ensure you have suff
 
 ### 3. **Run the Script**
 
-Run the program via the terminal:
+Run the program via the terminal, ensure `<path-to-unpacked-folder>` is enclosed in quotation marks `"`:
+
 #### Windows:
 
 ```bash
@@ -73,13 +74,27 @@ python3 gtp.py <path-to-unpacked-folder>
 python3 gtp.py <path-to-unpacked-folder>
 ```
 
-Alternatively, you can run the script without arguments:
+---
+
+Alternatively, you can run the script without arguments, and program will prompt you to paste the path interactively:
+
+#### Windows:
 
 ```bash
 python gtp.py
 ```
 
-The program will prompt you to paste the path interactively.
+#### macOS:
+
+```bash
+python3 gtp.py
+```
+
+#### Linux:
+
+```bash
+python3 gtp.py
+```
 
 ---
 
