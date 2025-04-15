@@ -54,24 +54,24 @@ The program **copies** all processed and unprocessed files. Ensure you have suff
 
 ### 3. **Run the Script**
 
-Run the program via the terminal, ensure `<path-to-unpacked-folder>` is enclosed in quotation marks `"`:
+Run the program via the terminal, ensure `<your-path-to-unpacked-folder>` is enclosed in quotation marks `"`:
 
 #### Windows:
 
 ```bash
-python gtp.py <path-to-unpacked-folder>
+python gtp.py "<your-path-to-unpacked-folder>"
 ```
 
 #### macOS:
 
 ```bash
-python3 gtp.py <path-to-unpacked-folder>
+python3 gtp.py "<your-path-to-unpacked-folder>"
 ```
 
 #### Linux:
 
 ```bash
-python3 gtp.py <path-to-unpacked-folder>
+python3 gtp.py "<your-path-to-unpacked-folder>"
 ```
 
 ---
