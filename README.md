@@ -56,19 +56,19 @@ The program **copies** all processed and unprocessed files. Ensure you have suff
 
 Run the program via the terminal, ensure `<your-path-to-unpacked-folder>` is enclosed in quotation marks `"`:
 
-#### Windows:
+- #### Windows:
 
 ```bash
 python gtp.py "<your-path-to-unpacked-folder>"
 ```
 
-#### macOS:
+- #### macOS:
 
 ```bash
 python3 gtp.py "<your-path-to-unpacked-folder>"
 ```
 
-#### Linux:
+- #### Linux:
 
 ```bash
 python3 gtp.py "<your-path-to-unpacked-folder>"
@@ -78,22 +78,32 @@ python3 gtp.py "<your-path-to-unpacked-folder>"
 
 Alternatively, you can run the script without arguments, and program will prompt you to paste the path interactively:
 
-#### Windows:
+- #### Windows:
 
 ```bash
 python gtp.py
 ```
 
-#### macOS:
+- #### macOS:
 
 ```bash
 python3 gtp.py
 ```
 
-#### Linux:
+- #### Linux:
 
 ```bash
 python3 gtp.py
+```
+
+#### Expected output:
+
+```bash
+usage: gtp.py [-h] path
+gtp.py: error: the following arguments are required: path
+
+You have not give arguments needed, so now you in the Wizard setup
+Enter path to your folder with takeouts: 
 ```
 
 ---
