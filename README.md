@@ -159,7 +159,7 @@ optional arguments:
 
 - **`-h` or `--help`** - Returns help, where program is briefly presented and arguments are displayed.
 
-- **`-p <path>` or `--path <path>`** - argument, which have to be followed by path to the directory with all takeuts. Takes only one argument, is mandatory, but if not given, wizard setup mode asks `<path>` again.
+- **`-p <path>` or `--path <path>`** - argument, which have to be followed by path to the directory with all takeouts. Takes only one argument, is mandatory, but if not given, wizard setup mode asks `<path>` again.
 
 - **`-s <suffix>` or `--suffix <suffix>`** - argument, which uses "append" principle and takes only one argument. As default, is set to `["", "-edited"]`, to add few suffixes, argument has to be specified separately for each value. Example:
   
@@ -247,9 +247,9 @@ You should not add suffixes, if you do not have problems with a lot of files, or
 
 6. **Save Logs:**  
    Information about all operations is saved in a `logs.txt` file that includes:  
-   - **Processed Files:** Original path, new path, and name.  
+   - **Processed Files:** Original path, new path, name, path to source json and time processed.
    - **Unprocessed Files:** Original path, new path, and name.  
-   - **Unprocessed JSONs:** Original path, new path, and name.
+   - **Unprocessed JSONs:** Original path, new path, name of the file they are refered to, time processed.
 
 ---
 
