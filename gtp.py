@@ -66,7 +66,11 @@ def unpack_json(path): # get what needed from single json file
     else: 
         return None
     
-def find_file(jsondata, files): # get full path to the file, based on it's name, which was extracted from json
+def gener_names(title, suffixes):
+    name, ext = os.path.splitext(title)
+    return [(name + add + ext) for add in suffixes]
+    
+def find_file(jsondata, files, suffixes): # get full path to the file, based on it's name, which was extracted from json
     # logic to make "title" from json be the same as name of the file
     if len(jsondata["title"]) > 51:
         name, ext = os.path.splitext(jsondata["title"])
@@ -78,10 +82,10 @@ def find_file(jsondata, files): # get full path to the file, based on it's name,
             name, ext = os.path.splitext(jsondata["title"])
             jsondata["title"] = f'{name}{brackets}{ext}'
     
-    filepath = [file for file in files if file["filename"] == jsondata["title"]] # actual search, I just look for same filenames, based on json's data
+    filepath = [file for file in files if file["filename"] in gener_names(jsondata["title"], suffixes)] # actual search, I just look for same filenames, based on json's data
     
-    if filepath and len(filepath) == 1:
-        return True, filepath[0]
+    if filepath:
+        return True, filepath
     else:
         return False, {"jsonpath": jsondata["filepath"],
                        "title": jsondata["title"]}
@@ -131,6 +135,7 @@ def savelogs(saveto, processed, unprocessed, unprocessed_jsons, endtime): # save
         for file in unprocessed:
             filename = file["filename"]
             filepath = file["filepath"]
+            procpath = file["procpath"]
             logfile.write(f"    {filename}:\n")
             logfile.write(f"        base file:     {filepath}\n")
             logfile.write(f"        copied file: {procpath}\n")
@@ -140,7 +145,7 @@ def savelogs(saveto, processed, unprocessed, unprocessed_jsons, endtime): # save
         logfile.write(f"Unprocessed: {len(unprocessed)} files, {len(unprocessed_jsons)} jsons\n")
         logfile.write(f"Time used: {endtime} seconds")
         
-def main(path):
+def main(path, suffixes):
     start_time = time.time() # saving current time to return time program ran in the end
     
     # log lists:
@@ -169,18 +174,19 @@ def main(path):
         jsondata = unpack_json(jsonpath)
         
         # look for file pair based on json data
-        exist, file = find_file(jsondata, files)
+        exist, files_ = find_file(jsondata, files, suffixes)
         if exist:
-            # copy and modify file, if found
-            procpath = copy_modify(file, jsondata["date"], saveto)
-            # save path to modified file
-            file["procpath"] = procpath
-            processed.append(file)
+            for file in files_:
+                # copy and modify file, if found
+                procpath = copy_modify(file, jsondata["date"], saveto)
+                # save path to modified file
+                file["procpath"] = procpath
+                processed.append(file)
         else:
             # add info about jsons which have not found any pair, to present it in logs
-            unprocessed_jsons.append({"filename": file["jsonpath"][len(os.path.dirname(file["jsonpath"]))+1::],
-                                      "filepath": file["jsonpath"],
-                                      "title": file["title"]})
+            unprocessed_jsons.append({"filename": files_["jsonpath"][len(os.path.dirname(files_["jsonpath"]))+1::],
+                                      "filepath": files_["jsonpath"],
+                                      "title": files_["title"]})
     
     
     print("\nWorking with unprocessed files...")
@@ -214,19 +220,27 @@ def wizard(): # wizard mode, if user have not given the argument before running
     except:
         pass
     
-def parse(description): # starte point of the program, where variable "path" is being created
+def parse(description): # start point of the program, where variable "path" is being created
+    suffixes = ["", "-edited"] # text google can add to the name of the file and without making separate json
+    # this means that file cat.png and cat-edited.png have only one json - cat.png.supplemental-metadata.json
     
     parser = argparse.ArgumentParser(description=description, formatter_class=argparse.RawTextHelpFormatter)
     
-    parser.add_argument("path", help="The full path to the repository containing Takeout folders")
+    parser.add_argument("path", help="The full path to the repository containing Takeout folders", type=str)
+    parser.add_argument("suffixes", nargs="*", help="Additional suffixes you want to add", type=str)
     
     try:
         args = parser.parse_args()
         path = args.path
+        for suffix in args.suffixes:
+            for suf in suffix.split(","):
+                suf = suf.strip()
+                if suf:
+                    suffixes.append(suf)
     except:
         path = wizard()
     
-    main(path)
+    main(path, suffixes)
 
 
 if __name__ == "__main__": # run the program
