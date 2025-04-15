@@ -28,7 +28,7 @@ This utility solves these problems:
 ## 🛠️ Setup and Usage
 
 **🚨 Note:**  
-The program **copies** all processed and unprocessed files. Ensure you have sufficient free space to accommodate slightly more than the total size of the input folder!
+The program **does not change** any folders or files, does not delete or modify, it strictly **copies** all processed and unprocessed files. Ensure you have sufficient free space to accommodate slightly more than the total size of the input folder!
 
 ### 1. **Prepare Your Takeout Data**
 
@@ -48,31 +48,35 @@ The program **copies** all processed and unprocessed files. Ensure you have suff
 
 - Install the required dependencies:
 
+  - #### Windows:
+
   ```bash
   pip install -r requirements.txt
   ```
 
+  - #### macOS/Linux:
+
+  ```bash
+  pip3 install -r requirements.txt
+  ```
+
 ### 3. **Run the Script**
 
-Run the program via the terminal, ensure `<your-path-to-unpacked-folder>` is enclosed in quotation marks `"`:
+Run the program via the terminal:
 
 - #### Windows:
 
 ```bash
-python gtp.py "<your-path-to-unpacked-folder>"
+python gtp.py --path <your-path-to-unpacked-folder>
 ```
 
-- #### macOS:
+- #### macOS/Linux:
 
 ```bash
-python3 gtp.py "<your-path-to-unpacked-folder>"
+python3 gtp.py --path <your-path-to-unpacked-folder>
 ```
 
-- #### Linux:
-
-```bash
-python3 gtp.py "<your-path-to-unpacked-folder>"
-```
+Ensure `<your-path-to-unpacked-folder>` is enclosed in quotation marks `"`, if names of your folders contain special characters or spaces.
 
 ---
 
@@ -84,13 +88,7 @@ Alternatively, you can run the script without arguments, and program will prompt
 python gtp.py
 ```
 
-- #### macOS:
-
-```bash
-python3 gtp.py
-```
-
-- #### Linux:
+- #### macOS/Linux:
 
 ```bash
 python3 gtp.py
@@ -99,9 +97,6 @@ python3 gtp.py
 #### Expected output:
 
 ```bash
-usage: gtp.py [-h] path
-gtp.py: error: the following arguments are required: path
-
 You have not given arguments needed, so you have been redirected to the Wizard setup
 Enter path to your folder with takeouts: 
 ```
@@ -113,7 +108,7 @@ Enter path to your folder with takeouts:
 Once the program finishes processing:
 
 1. A new folder, **ProcessedPhotos**, will appear next to the folder you provided. This folder will include:
-   - Subfolders organized by year, e.g., `Photos from 2008`, `Photos from 2023`, etc.
+   - An `Processed` folder containing subfolders organized by year, e.g., `Photos from 2008`, `Photos from 2023`, etc.
    - An `Unprocessed` folder containing files and metadata that couldn't be matched for processing.
    - A `logs.txt` file summarizing:
      - Processed files with updated attributes.
@@ -121,6 +116,106 @@ Once the program finishes processing:
 2. A terminal output summarizing:
    - The number of processed/unprocessed files.
    - The total time taken for processing.
+
+---
+
+## Terminal running
+
+Running from terminal supports arguments. Example with help:
+
+- #### Windows:
+
+```bash
+python gtp.py -h
+```
+
+- #### macOS/Linux:
+
+```bash
+python3 gtp.py -h
+```
+
+#### Expected output:
+
+```bash
+Google Takeout Processor
+
+This program processes Google Takeout data by analyzing files in a specified folder. It identifies `.json` files for metadata (e.g., creation date, file name) and processes the corresponding files accordingly.
+
+Files without a matching `.json` file or those that cannot be located are marked as unprocessed and copied to a separate folder for review.
+
+Processed files are copied and modified based on their metadata, while unprocessed ones are logged.
+
+More details can be found in the README file.
+Git repository for this project: https://github.com/mshablovskyy/gtp.git
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -p PATH, --path PATH  The full path to the repository containing Takeout folders
+  -s SUFFIX, --suffix SUFFIX  Additional suffixes you want to add
+```
+
+### Detailed explaining of every argument:
+
+- **`-h` or `--help`** - Returns help, where program is briefly presented and arguments are displayed.
+
+- **`-p <path>` or `--path <path>`** - argument, which have to be followed by path to the directory with all takeuts. Takes only one argument, is mandatory, but if not given, wizard setup mode asks `<path>` again.
+
+- **`-s <suffix>` or `--suffix <suffix>`** - argument, which uses "append" principle and takes only one argument. As default, is set to `["", "-edited"]`, to add few suffixes, argument has to be specified separately for each value. Example:
+  
+  - ```bash
+    gtp.py --path /Users/photolover/my-takeouts -s "-stickers" -s "-connect"
+    ```
+
+---
+
+## Suffixes
+
+You might wonder—what exactly are these suffixes? While they may not seem entirely logical, we must work around Google's peculiar conventions, so let's get used to them.
+
+### The Issue
+
+In an ideal situation:
+
+- Each file would have its corresponding JSON data file, meaning the number of JSONs and other associated files would be equal.
+
+However, during development, I discovered that this isn't always the case:
+
+- Often, there are fewer JSON files compared to other files.
+- Initially, I ignored the extra, "unprocessed" files, assuming Google forgot to provide JSON data for them.
+
+But after testing the program on larger datasets, I uncovered a pattern:
+
+- Many unprocessed files contained the suffix `-edited` before their file extension (e.g., `cat-edited.png`).
+- These files had counterparts without the `-edited` suffix (e.g., `cat.png`) that were being processed correctly.
+- Google implicitly expects us to treat `cat.png` and `cat-edited.png` as sharing a single JSON file (`cat.json`). 
+
+This quirk is exactly why **suffixes were implemented**.
+
+### Suffix Solution
+
+Since I cannot predict all the variations Google might append to filenames, such as `-edited`, `-sticker`, or others, suffixes allow you to manually address this issue when running the program.
+
+If you notice files in the `unprocessed` folder with suffixes (e.g., `-sticker`) that should be treated as their base counterparts (e.g., `file-sticker.png` → `file.png`), you can specify the suffix to handle them during execution.
+
+### Preset suffixes:
+
+- ` ` - actually, nothing. Usually, nothing is added, so this suffix is obligatory.
+- `-edited` - important suffix, which, as I understood, Google adds to files you edited in Google Photos. I do not know why exact modification date is not saved, but not to leave such files unprocessed, this suffix exists.
+
+### Usage
+
+To utilize suffixes, simply pass them as arguments when running the program from the terminal, as demonstrated earlier.
+
+For example:
+
+```bash
+gtp.py -p <path> -s -sticker
+```
+
+### Note:
+
+You should not add suffixes, if you do not have problems with a lot of files, or if you are not fully aware what you are doing. It can lead to incorrect file handling or potential data loss.
 
 ---
 
@@ -176,18 +271,6 @@ In all such cases, files and JSONs are moved to the `unprocessed` folder for man
 
 ---
 
-## 📂 Program Output  
-
-After running the program, the following will appear next to your input folder:
-
-- **ProcessedPhotos Folder:**  
-  - Subfolders organized by year (e.g., `Photos from 2008`, `Photos from 2023`).  
-  - An `unprocessed` folder containing unmatched files and JSONs.  
-- **logs.txt File:**  
-  - Details of processed files, unprocessed files, and unprocessed JSONs.
-
----
-
 ## 🔄 Final Result  
 
 At the end of execution, you’ll see:  
@@ -202,7 +285,7 @@ At the end of execution, you’ll see:
 
 If you encounter issues or have questions, feel free to:
 
-- Open an [issue](https://github.com/mshablovskyy/GTP/issues) on GitHub.
+- Open an [issue](https://github.com/mshablovskyy/gtp/issues) on GitHub.
 - Contact me
 
 ---
