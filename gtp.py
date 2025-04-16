@@ -224,7 +224,7 @@ def main(path, suffixes):
     print(f"Processed {len(processed)} files")
     print(f"Unprocessed: {len(unprocessed)} files, {len(unprocessed_jsons)} jsons")
     print(f"Time used: {end_time} seconds")
-    unprocpath = os.path.join(saveto, "Processed")
+    procpath = os.path.join(saveto, "Processed")
     print(f"\nFolder with processed files:\n{procpath}")
     unprocpath = os.path.join(saveto, "Unprocessed")
     print(f"Folder with unprocessed files:\n{unprocpath}\n")
