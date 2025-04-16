@@ -186,8 +186,8 @@ However, during development, I discovered that this isn't always the case:
 
 But after testing the program on larger datasets, I uncovered a pattern:
 
-- Many unprocessed files contained the suffix `-edited` before their file extension (e.g., `cat-edited.png`).
-- These files had counterparts without the `-edited` suffix (e.g., `cat.png`) that were being processed correctly.
+- Many unprocessed files contained the suffix `-edited` before their file extension (e.g., `cat-edited.png`), but don't have json associated with `cat-edited.png` file. At the same time files without suffixes were processed correctly, as `json` with metadata for them exist.
+- These unprocessed files had counterparts without the `-edited` suffix (e.g., `cat.png`) that were being processed correctly.
 - Google implicitly expects us to treat `cat.png` and `cat-edited.png` as sharing a single JSON file (`cat.json`). 
 
 This quirk is exactly why **suffixes were implemented**.
@@ -196,7 +196,9 @@ This quirk is exactly why **suffixes were implemented**.
 
 Since I cannot predict all the variations Google might append to filenames, such as `-edited`, `-sticker`, or others, suffixes allow you to manually address this issue when running the program.
 
-If you notice files in the `unprocessed` folder with suffixes (e.g., `-sticker`) that should be treated as their base counterparts (e.g., `file-sticker.png` → `file.png`), you can specify the suffix to handle them during execution.
+If you notice files in the `unprocessed` folder with suffixes (e.g., `-sticker`) that should be treated as their base counterparts (e.g., `file-sticker.png` → `file.png`), you can specify the suffix, which will be used as additional filter, to handle more files during execution.
+
+Keep in mind that creation date for files with suffixes is obtained from `json` file, related to file with the same name, but without suffix, as files with suffixes in name do not have their own `json` file.
 
 ### Preset suffixes:
 
@@ -215,7 +217,7 @@ gtp.py -p <path> -s -sticker
 
 ### Note:
 
-You should not add suffixes, if you do not have problems with a lot of files, or if you are not fully aware what you are doing. It can lead to incorrect file handling or potential data loss.
+You should not add suffixes, if you do not have problems with a lot of **unprocessed** files, or if you are not fully aware what you are doing. It can lead to incorrect file handling or potential data loss.
 
 ---
 
