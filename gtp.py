@@ -169,7 +169,7 @@ def main(path, suffixes):
         return
     
     # let people know, what you work with
-    print("\Process started...")
+    print("\nProcess started...")
     print(f"\nWorking in directory {path}")
     
     # get lists with json files and non-json files
@@ -246,15 +246,13 @@ def parse(description): # start point of the program, where variable "path" is b
     parser.add_argument("-p", "--path", help="The full path to the repository containing Takeout folders", type=str, default=None)
     parser.add_argument("-s", "--suffix", action="append", help="Additional suffixes you want to add", type=str, default=suffixes)
     
-    try:
-        args = parser.parse_args()
-        path = args.path
-        suffixes = args.suffix
+    args = parser.parse_args()
         
-        if not path:
-            path = wizard()
-    except:
+    if not args.path:
         path = wizard()
+    else: path = args.path
+    
+    suffixes = args.suffix
     
     main(path, suffixes)
 
