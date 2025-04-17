@@ -42,8 +42,8 @@ The program **does not change** any folders or files, does not delete or modify,
 - Clone this repository:
 
   ```bash
-  git clone https://github.com/mshablovskyy/GTP.git
-  cd GTP
+  git clone https://github.com/mshablovskyy/gtp.git
+  cd gtp
   ```
 
 - Install the required dependencies:
