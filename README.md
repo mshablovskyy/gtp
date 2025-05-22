@@ -28,7 +28,7 @@ This utility solves these problems:
 ## 🛠️ Setup and Usage
 
 **🚨 Note:**  
-The program **does not change** any folders or files, does not delete or modify, it strictly **copies** all processed and unprocessed files. Ensure you have sufficient free space to accommodate slightly more than the total size of the input folder!
+The program **does not change** any source folders or files, does not delete or modify, it strictly **copies** all processed and unprocessed files. Ensure you have sufficient free space to accommodate slightly more than the total size of the input folder!
 
 ### 1. **Prepare Your Takeout Data**
 
@@ -42,8 +42,8 @@ The program **does not change** any folders or files, does not delete or modify,
 - Clone this repository:
 
   ```bash
-  git clone https://github.com/mshablovskyy/GTP.git
-  cd GTP
+  git clone https://github.com/mshablovskyy/gtp.git
+  cd gtp
   ```
 
 - Install the required dependencies:
