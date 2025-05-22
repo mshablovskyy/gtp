@@ -56,22 +56,31 @@ def get_file_names(path): # get all files from all folders inside directory give
                 })
     return jsons, files
 
-def unpack_json(path): # get what needed from single json file.
+def unpack_json(path, savelogsto): # get what needed from single json file.
+    # Log the processing of the JSON file
+    log_detail(savelogsto, f"Processing JSON file: {path}")
     if exists(path):
         try:
+            # Open the JSON file and load its content
             with open(path, "r", encoding='utf-8') as file:
                 content = json.load(file)
             # Check for required keys
             if ("title" not in content or
                 "photoTakenTime" not in content or
                 "timestamp" not in content["photoTakenTime"]):
+                # If the required keys are missing, log the error and return None
+                log_detail(savelogsto, f"Invalid JSON structure in file, skipping: {path}")
                 return None
+            # Extract the required information
+            log_detail(savelogsto, f"Extracting data from JSON file: {path}")
             return {"filepath": path,
                     "title": content["title"],
                     "date": datetime.fromtimestamp(int(content["photoTakenTime"]["timestamp"]))}
         except Exception:
+            log_detail(savelogsto, f"Error processing JSON file, skipping: {path}")
             return None
     else: 
+        log_detail(savelogsto, f"JSON file does not exist, skipping: {path}")
         return None
     
 def gener_names(title, suffixes): # generate possible file names using suffixes provided.
@@ -90,7 +99,8 @@ def find_file(jsondata, files, suffixes): # get full path to the file, based on 
             name, ext = os.path.splitext(jsondata["title"])
             jsondata["title"] = f'{name}{brackets}{ext}'
     
-    filepath = [file for file in files if file["filename"] in gener_names(jsondata["title"], suffixes)] # actual search, code just looks for same filenames, based on json's data and suffixes.
+    # actual search, code just looks for same filenames, based on json's data and suffixes.
+    filepath = [file for file in files if file["filename"] in gener_names(jsondata["title"], suffixes)] 
     
     if filepath:
         return True, filepath
@@ -110,11 +120,20 @@ def copy_modify(file, date, copyto): # copy and change creation and modification
 def copy_unprocessed(unprocessed, saveto): # copy all files that were not returned during json-based search
     to_return = []
     for file in tqdm(unprocessed, desc="Copying"):
+        # log the copying of unprocessed files
+        log_detail(saveto, f"Copying unprocessed file: {file['filepath']}")
         new_file = os.path.join(saveto, checkout_dir(os.path.join(saveto, "Unprocessed")), file["filename"])
         shutil.copy(file["filepath"], new_file)
+        # log the successful copying of the unprocessed file
+        log_detail(saveto, f"Successfully copied unprocessed file to: {new_file}\n")
         file["procpath"] = new_file
         to_return.append(file)
     return to_return # return list with all unprocessed files, with path to the copied unmodified files
+
+def log_detail(saveto, message):
+    # Append a message to the detailed log file.
+    with open(os.path.join(saveto, "detailed_logs.txt"), "a") as logfile:
+        logfile.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')} - {message}\n")
 
 def savelogs(saveto, processed, unprocessed, unprocessed_jsons, endtime, startdate, enddate): # save everything that was done in separate file
     with open(os.path.join(saveto, "logs.txt"), "w") as logfile:
@@ -186,30 +205,43 @@ def main(path, suffixes):
     # creating new folder for all modified files
     saveto = checkout_dir(os.path.join(os.path.dirname(path), "gtpOutput"), onlynew = True)
     
+    # adding first line to the detailed_logs.txt file
+    log_detail(saveto, f"Started processing directory: {path}\n")
+    
     # main loop: (tqdm is for dynamic progress bar in terminal)
     for jsonpath in tqdm(jsons, desc="Files processed"):
         # get everithing from json:
-        jsondata = unpack_json(jsonpath)
+        jsondata = unpack_json(jsonpath, saveto)
         
         if not jsondata:
             unprocessed_jsons.append({"filename": jsonpath[len(os.path.dirname(jsonpath))+1::],
                                       "filepath": jsonpath,
                                       "title": "Title is missing",
                                       "time": time.strftime("%Y-%m-%d %H:%M:%S")})
+            # log the scipping of the JSON file
+            log_detail(saveto, f"Skipping JSON file in the main loop: {jsonpath}\n")
             continue # if json is empty, skip it
         
         # look for file pair based on json data
+        # log the search for the file pairs based on json data
+        log_detail(saveto, f"Searching for file pairs based on \"title\" from JSON: {jsondata['title']}")
         exist, files_ = find_file(jsondata, files, suffixes)
         for file in files_:
             if exist:
                 # copy and modify file, if found
+                # log the copying and modification of the file
+                log_detail(saveto, f"Copying and modifying file: {file['filepath']}")
                 procpath = copy_modify(file, jsondata["date"], checkout_dir(os.path.join(saveto, "Processed")))
                 # save path to modified file
                 file["procpath"] = procpath
                 file["jsonpath"] = jsonpath
                 file["time"] = time.strftime("%Y-%m-%d %H:%M:%S")
+                # log the successful processing of the file
+                log_detail(saveto, f"Successfully processed file: {file['filename']}\n")
                 processed.append(file)
             else:
+                # log the unprocessed JSON file
+                log_detail(saveto, f"Unprocessed JSON file, no pair found for: {file['jsonpath']}\n")
                 # add info about jsons which have not found any pair, to present it in logs
                 unprocessed_jsons.append({"filename": file["jsonpath"][len(os.path.dirname(file["jsonpath"]))+1::],
                                           "filepath": file["jsonpath"],
@@ -218,6 +250,9 @@ def main(path, suffixes):
     
     
     print("\nWorking with unprocessed files...")
+    
+    # log the processing of unprocessed files
+    log_detail(saveto, f"Processing unprocessed files...\n")
     # make list of files, which have not been processed, based by list of all files and processed ones, and that save name and path separately not to extract it every time needed
     unprocessed = [{"filename": file[len(os.path.dirname(file))+1::], "filepath": file} for file in tqdm(list(set([file["filepath"] for file in files]) - set([file["filepath"] for file in processed])), desc="Analizing")]
     
@@ -232,6 +267,8 @@ def main(path, suffixes):
     end_time = round(time.time() - start_time, 3)
     end_date = time.strftime("%Y-%m-%d %H:%M:%S")
     
+    # log the end of the processing
+    log_detail(saveto, f"Finished processing directory: {path}, readable logs are in {saveto}/logs.txt")
     # create and save logs into separate file inside "saveto" folder
     savelogs(saveto, processed, unprocessed, unprocessed_jsons, end_time, start_date, end_date)
     

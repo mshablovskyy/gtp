@@ -22,6 +22,7 @@ This utility solves these problems:
 - **Corrects File Attributes:** Updates the creation and modification dates of files to match the timestamps from their metadata.
 - **Manages Unprocessed Files:** Automatically relocates unmatched or unprocessable files to an "Unprocessed" folder for manual review.
 - **Generates Logs:** Creates a `logs.txt` file summarizing the operations for processed and unprocessed files.
+- **Generates Detailed Logs:** Creates a `detailed_logs.txt` file, showing how everything was done step by step and helps to found errors.
 
 ---
 
@@ -113,6 +114,11 @@ Once the program finishes processing:
    - A `logs.txt` file summarizing:
      - Processed files with updated attributes.
      - Unprocessed files and metadata for review.
+   - A `detailed_logs.txt` file, showing step by step every:
+     - Skip
+     - Copy
+     - Exraction
+     - Change
 2. A terminal output summarizing:
    - The number of processed/unprocessed files.
    - The total time taken for processing.
@@ -289,6 +295,12 @@ If you encounter issues or have questions, feel free to:
 
 - Open an [issue](https://github.com/mshablovskyy/gtp/issues) on GitHub.
 - Contact me
+
+---
+
+## 🔧 Already Solved Issues
+
+- If processed folder contained any unrelated `.json`s, program crashed. Now it is solved.
 
 ---
 
