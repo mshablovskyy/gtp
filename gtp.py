@@ -58,11 +58,19 @@ def get_file_names(path): # get all files from all folders inside directory give
 
 def unpack_json(path): # get what needed from single json file.
     if exists(path):
-        with open(path, "r", encoding='utf-8') as file:
-            content = json.load(file)
-        return {"filepath": path,
-                "title": content["title"],
-                "date": datetime.fromtimestamp(int(content["photoTakenTime"]["timestamp"]))}
+        try:
+            with open(path, "r", encoding='utf-8') as file:
+                content = json.load(file)
+            # Check for required keys
+            if ("title" not in content or
+                "photoTakenTime" not in content or
+                "timestamp" not in content["photoTakenTime"]):
+                return None
+            return {"filepath": path,
+                    "title": content["title"],
+                    "date": datetime.fromtimestamp(int(content["photoTakenTime"]["timestamp"]))}
+        except Exception:
+            return None
     else: 
         return None
     
@@ -182,6 +190,13 @@ def main(path, suffixes):
     for jsonpath in tqdm(jsons, desc="Files processed"):
         # get everithing from json:
         jsondata = unpack_json(jsonpath)
+        
+        if not jsondata:
+            unprocessed_jsons.append({"filename": jsonpath[len(os.path.dirname(jsonpath))+1::],
+                                      "filepath": jsonpath,
+                                      "title": "Title is missing",
+                                      "time": time.strftime("%Y-%m-%d %H:%M:%S")})
+            continue # if json is empty, skip it
         
         # look for file pair based on json data
         exist, files_ = find_file(jsondata, files, suffixes)
