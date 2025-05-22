@@ -275,7 +275,7 @@ Files and metadata may fail to match for several reasons:
 3. **Missing JSON:**  
    A file might lack a corresponding JSON file entirely, preventing processing.
 
-In all such cases, files and JSONs are moved to the `unprocessed` folder for manual review.
+In all such cases, files and JSONs are copied to the `unprocessed` folder for manual review.
 
 ---
 
