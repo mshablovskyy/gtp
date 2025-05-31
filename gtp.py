@@ -65,7 +65,8 @@ def unpack_json(path, savelogsto): # get what needed from single json file.
             with open(path, "r", encoding='utf-8') as file:
                 content = json.load(file)
             # Check for required keys
-            if ("title" not in content or
+            if (not content or 
+                "title" not in content or
                 "photoTakenTime" not in content or
                 "timestamp" not in content["photoTakenTime"]):
                 # If the required keys are missing, log the error and return None
@@ -76,8 +77,8 @@ def unpack_json(path, savelogsto): # get what needed from single json file.
             return {"filepath": path,
                     "title": content["title"],
                     "date": datetime.fromtimestamp(int(content["photoTakenTime"]["timestamp"]))}
-        except Exception:
-            log_detail(savelogsto, f"Error processing JSON file, skipping: {path}")
+        except Exception as e:
+            log_detail(savelogsto, f"Error processing JSON file, error: {e}, skipping: {path}")
             return None
     else: 
         log_detail(savelogsto, f"JSON file does not exist, skipping: {path}")
