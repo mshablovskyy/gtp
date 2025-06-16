@@ -133,11 +133,11 @@ def copy_unprocessed(unprocessed, saveto): # copy all files that were not return
 
 def log_detail(saveto, message):
     # Append a message to the detailed log file.
-    with open(os.path.join(saveto, "detailed_logs.txt"), "a") as logfile:
+    with open(os.path.join(saveto, "detailed_logs.txt"), "a", encoding="utf-8") as logfile:
         logfile.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')} - {message}\n")
 
 def savelogs(saveto, processed, unprocessed, unprocessed_jsons, endtime, startdate, enddate): # save everything that was done in separate file
-    with open(os.path.join(saveto, "logs.txt"), "w") as logfile:
+    with open(os.path.join(saveto, "logs.txt"), "w", encoding="utf-8") as logfile:
         if processed: # if any files were processed
             logfile.write(f"Processed files:\n\n")
             
