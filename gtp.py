@@ -84,24 +84,31 @@ def unpack_json(path, savelogsto): # get what needed from single json file.
         log_detail(savelogsto, f"JSON file does not exist, skipping: {path}")
         return None
     
-def gener_names(title, suffixes): # generate possible file names using suffixes provided.
-    name, ext = os.path.splitext(title)
-    return [(name + add + ext) for add in suffixes]
+def gener_names(filename, suffixes): # generate possible file names using suffixes provided.
+    if filename["brackets"]:
+        return [(filename["name"] + suf + filename["brackets"] + filename["extension"]) for suf in suffixes]
+    else:
+        return [(filename["name"] + suf + filename["extension"]) for suf in suffixes]
     
 def find_file(jsondata, files, suffixes): # get full path to the file, based on it's name, which was extracted from json.
     # logic is to make "title" from json be the same as name of the file.
-    if len(jsondata["title"]) > 51:
-        name, ext = os.path.splitext(jsondata["title"])
-        jsondata["title"] = f'{name[0:51-len(ext)]}{ext}'
+    # logic is to make dictionary with sufficient data to create file name to search for, using gener_names function.
+    name, ext = os.path.splitext(jsondata["title"])
+    filename = {
+        "name": name,
+        "extension": ext,
+        "brackets": None
+    }
+    if len(filename["name"] + filename["extension"]) > 51:
+        filename["name"] = filename["name"][0:51-len(filename["extension"])]
     if jsondata["filepath"].endswith(").json"):
         brackets = re.findall("\\([1-999]\\)\\.json", jsondata["filepath"])
         if brackets:
             brackets = brackets[-1][:-5]
-            name, ext = os.path.splitext(jsondata["title"])
-            jsondata["title"] = f'{name}{brackets}{ext}'
+            filename["brackets"] = brackets
     
     # actual search, code just looks for same filenames, based on json's data and suffixes.
-    filepath = [file for file in files if file["filename"] in gener_names(jsondata["title"], suffixes)] 
+    filepath = [file for file in files if file["filename"] in gener_names(filename, suffixes)] 
     
     if filepath:
         return True, filepath
