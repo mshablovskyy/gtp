@@ -91,7 +91,6 @@ def gener_names(filename, suffixes): # generate possible file names using suffix
         return [(filename["name"] + suf + filename["extension"]) for suf in suffixes]
     
 def find_file(jsondata, files, suffixes): # get full path to the file, based on it's name, which was extracted from json.
-    # logic is to make "title" from json be the same as name of the file.
     # logic is to make dictionary with sufficient data to create file name to search for, using gener_names function.
     name, ext = os.path.splitext(jsondata["title"])
     filename = {
