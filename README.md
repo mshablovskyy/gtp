@@ -22,14 +22,14 @@ This utility solves these problems:
 - **Corrects File Attributes:** Updates the creation and modification dates of files to match the timestamps from their metadata.
 - **Manages Unprocessed Files:** Automatically relocates unmatched or unprocessable files to an "Unprocessed" folder for manual review.
 - **Generates Logs:** Creates a `logs.txt` file summarizing the operations for processed and unprocessed files.
-- **Generates Detailed Logs:** Creates a `detailed_logs.txt` file, showing how everything was done step by step and helps to found errors.
+- **Generates Detailed Logs:** Creates a `detailed_logs.txt` file, showing how everything was done step by step and helps to find errors.
 
 ---
 
 ## 🛠️ Setup and Usage
 
 **🚨 Note:**  
-The program **does not change** any source folders or files, does not delete or modify, it strictly **copies** all processed and unprocessed files. Ensure you have sufficient free space to accommodate slightly more than the total size of the input folder!
+The program **does not change** any source folders or files, does not delete or modify them; it strictly **copies** all processed and unprocessed files. Ensure you have sufficient free space to accommodate slightly more than the total size of the input folder!
 
 ### 1. **Prepare Your Takeout Data**
 
@@ -39,7 +39,7 @@ The program **does not change** any source folders or files, does not delete or 
 
 ### 2. **Install Python and Dependencies**
 
-- Install Python (version 3.9.6 or later is preffered, it was not tested on older versions).
+- Install Python (version 3.9.6 or later is preferred; it was not tested on older versions).
 - Clone this repository:
 
   ```bash
@@ -81,7 +81,7 @@ Ensure `<your-path-to-unpacked-folder>` is enclosed in quotation marks `"`, if n
 
 ---
 
-Alternatively, you can run the script without arguments, and program will prompt you to paste the path interactively:
+Alternatively, you can run the script without arguments, and the program will prompt you to paste the path interactively:
 
 - #### Windows:
 
@@ -109,15 +109,15 @@ Enter path to your folder with takeouts:
 Once the program finishes processing:
 
 1. A new folder, **ProcessedPhotos**, will appear next to the folder you provided. This folder will include:
-   - An `Processed` folder containing subfolders organized by year, e.g., `Photos from 2008`, `Photos from 2023`, etc.
-   - An `Unprocessed` folder containing files and metadata that couldn't be matched for processing.
+   - A `Processed` folder containing subfolders organized by year, e.g., `Photos from 2008`, `Photos from 2023`, etc.
+   - An `Unprocessed` folder containing files and metadata that couldn't be matched or processed.
    - A `logs.txt` file summarizing:
      - Processed files with updated attributes.
      - Unprocessed files and metadata for review.
    - A `detailed_logs.txt` file, showing step by step every:
      - Skip
      - Copy
-     - Exraction
+     - Extraction
      - Change
 2. A terminal output summarizing:
    - The number of processed/unprocessed files.
@@ -161,13 +161,13 @@ optional arguments:
   -s SUFFIX, --suffix SUFFIX  Additional suffixes you want to add
 ```
 
-### Detailed explaining of every argument:
+### Detailed explanation of every argument:
 
-- **`-h` or `--help`** - Returns help, where program is briefly presented and arguments are displayed.
+- **`-h` or `--help`** - Returns help, where the program is briefly presented and arguments are displayed.
 
-- **`-p <path>` or `--path <path>`** - argument, which have to be followed by path to the directory with all takeouts. Takes only one argument, is mandatory, but if not given, wizard setup mode asks `<path>` again.
+- **`-p <path>` or `--path <path>`** - Argument which must be followed by the path to the directory with all takeouts. Takes only one argument, is mandatory, but if not given, wizard setup mode asks `<path>` again.
 
-- **`-s <suffix>` or `--suffix <suffix>`** - argument, which uses "append" principle and takes only one argument. As default, is set to `["", "-edited"]`, to add few suffixes, argument has to be specified separately for each value. Example:
+- **`-s <suffix>` or `--suffix <suffix>`** - Argument which uses the "append" principle and takes only one argument. By default, it is set to `["", "-edited"]`. To add multiple suffixes, the argument has to be specified separately for each value. Example:
   
   - ```bash
     gtp.py --path /Users/photolover/my-takeouts -s "-stickers" -s "-connect"
@@ -177,7 +177,7 @@ optional arguments:
 
 ## Suffixes
 
-You might wonder—what exactly are these suffixes? While they may not seem entirely logical, we must work around Google's peculiar conventions, so let's get used to them.
+You might wonder - what exactly are these suffixes? While they may not seem entirely logical, we must work around Google's peculiar conventions, so let's get used to them.
 
 ### The Issue
 
@@ -192,7 +192,7 @@ However, during development, I discovered that this isn't always the case:
 
 But after testing the program on larger datasets, I uncovered a pattern:
 
-- Many unprocessed files contained the suffix `-edited` before their file extension (e.g., `cat-edited.png`), but don't have json associated with `cat-edited.png` file. At the same time files without suffixes were processed correctly, as `json` with metadata for them exist.
+- Many unprocessed files contained the suffix `-edited` before their file extension (e.g., `cat-edited.png`), but don't have a JSON associated with the `cat-edited.png` file. At the same time, files without suffixes were processed correctly, as a JSON with metadata for them exists.
 - These unprocessed files had counterparts without the `-edited` suffix (e.g., `cat.png`) that were being processed correctly.
 - Google implicitly expects us to treat `cat.png` and `cat-edited.png` as sharing a single JSON file (`cat.json`). 
 
@@ -202,14 +202,14 @@ This quirk is exactly why **suffixes were implemented**.
 
 Since I cannot predict all the variations Google might append to filenames, such as `-edited`, `-sticker`, or others, suffixes allow you to manually address this issue when running the program.
 
-If you notice files in the `unprocessed` folder with suffixes (e.g., `-sticker`) that should be treated as their base counterparts (e.g., `file-sticker.png` → `file.png`), you can specify the suffix, which will be used as additional filter, to handle more files during execution.
+If you notice files in the `Unprocessed` folder with suffixes (e.g., `-sticker`) that should be treated as their base counterparts (e.g., `file-sticker.png` → `file.png`), you can specify the suffix, which will be used as an additional filter, to handle more files during execution.
 
-Keep in mind that creation date for files with suffixes is obtained from `json` file, related to file with the same name, but without suffix, as files with suffixes in name do not have their own `json` file.
+Keep in mind that the creation date for files with suffixes is obtained from the JSON file related to the file with the same name but without the suffix, as files with suffixes in their name do not have their own JSON file.
 
 ### Preset suffixes:
 
 - ` ` - actually, nothing. Usually, nothing is added, so this suffix is obligatory.
-- `-edited` - important suffix, which, as I understood, Google adds to files you edited in Google Photos. I do not know why exact modification date is not saved, but not to leave such files unprocessed, this suffix exists.
+- `-edited` - important suffix, which, as I understand, Google adds to files you edited in Google Photos. I do not know why the exact modification date is not saved, but not to leave such files unprocessed, this suffix exists.
 
 ### Usage
 
@@ -223,11 +223,97 @@ gtp.py -p <path> -s -sticker
 
 ### Note:
 
-You should not add suffixes, if you do not have problems with a lot of **unprocessed** files, or if you are not fully aware what you are doing. It can lead to incorrect file handling or potential data loss.
+You should not add suffixes if you do not have problems with a lot of **unprocessed** files, or if you are not fully aware of what you are doing. It can lead to incorrect file handling or potential data loss.
 
 ---
 
-## ⚙️ How It Works: Step-by-Step
+## 🆕 About `separate.py`: Separate All JSONs and Unprocessed Files
+
+In some cases, after running the main script, you may notice a large number of unprocessed files. This often means that additional suffixes are needed to match more files correctly. However, to avoid any risk of overwriting or mixing up already correctly processed files, it's best to handle unprocessed files and all JSONs separately.
+
+That's why the `separate.py` script was created. Its purpose is to **separate all JSON files and Non-JSON files from a source directory and copy them into a new, separate output directory**. This allows you to copy only `.json` files, to safely experiment with different suffixes or processing strategies on the remaining files, without affecting your original or previously processed data.
+
+### Why Use `separate.py`?
+
+- **Safe:** By copying all files to a new location, nothing is changed, only a new folder is created.
+- **Full Coverage:** Ensures that every JSON and Non-JSON file is available, making it easier to run the script **again** with all `.json` files and unprocessed files after the first run.
+- **Organized Output:** The script creates a clear folder structure, separating JSONs and other files for easy review and further processing.
+
+### How to Run
+
+From your terminal, use the following command:
+
+- #### Windows:
+
+```bash
+python separate.py -s <path-to-your-source-folder> -d <path-to-output-folder>
+```
+
+- #### macOS/Linux:
+
+```bash
+python3 separate.py -s <path-to-your-source-folder> -d <path-to-output-folder>
+```
+
+**Example:**
+
+```bash
+python3 separate.py -s "/Users/yourname/Takeout" -d "/Users/yourname/TakeoutSeparated"
+```
+
+After running, you'll find two subfolders in the `SeparateOutput` folder in your output directory:
+- `jsons/` — containing all JSON files from the source.
+- `files/` — containing all other files.
+
+This workflow makes it easy to review, reprocess, or experiment with your data as needed.
+
+### Help command
+
+Help command is available for `separate.py`:
+
+- #### Windows:
+
+```bash
+python separate.py -h
+```
+
+- #### macOS/Linux:
+
+```bash
+python3 separate.py -h
+```
+
+---
+
+## 🔁 Running the script again
+
+Sometimes, after getting the output, you can be really disappointed. Maybe you get tons of unprocessed files with `-sticker` at the end of the name of each file, right before the extension, or a lot of files with `(1)` before the extension—what to do?
+
+In such cases, you should consider using the **suffixes** function of this script (as described above), and also `separate.py`.
+
+It is true that you can just run the script again, just adding the suffix. It will definitely work, but accuracy can be affected. Some files can get the wrong dates assigned—which is not what anyone would want. Suffixes are powerful, but with great power comes great responsibility, so you should do everything in the right way.
+
+### How to run the script again correctly:
+
+- Create a new folder for files.
+- Copy all unprocessed files. You can copy them, or just copy the folder with them, and paste it into the folder you just created.
+- Use `separate.py` according to the documentation to separate all `.json` files.
+- Copy those `.json` files or the folder containing them to the same folder where your unprocessed files were copied.
+
+This is the end of preparation. Now, use that folder as `<path>` to run `gtp.py` again. You can add any suffixes and do not worry about inaccuracy—you are working only with unprocessed files; files that were processed are not affected. After finishing, you can copy files you processed using the **suffixes** function to the folder with all processed files, and enjoy it! 
+
+### Why not just run again?
+
+It is a logical question: why make those copies when you can just run the script again with suffixes? But it is very important not to do so, because it can cause such problems:
+
+- Wrong date assignment: if you add `(1)` as a suffix, `name.jpg` and `name(1).jpg` will both get the date from `name.something.json`, not from `name.something.json` and `name.something(1).json` as they should. Usually, `name.jpg` and `name(1).jpg` are completely unrelated, so up to 50% of your photos can get incorrect dates.
+- If you put something like `xd` as a suffix, a lot of files can get wrong dates because of the same reason. More importantly, you can get completely unexpected results, and the final output will not be as accurate as possible.
+
+It is better just to do it as described, spend 2 more minutes, but be confident about results and enjoy accuracy.
+
+---
+
+## ⚙️ How GTP Works: Step-by-Step
 
 1. **Gather Input Data:**  
    The program scans the input folder and generates a list of all files with their full paths. It then separates the data into two lists:  
@@ -240,7 +326,7 @@ You should not add suffixes, if you do not have problems with a lot of **unproce
 3. **Process JSON Files:**  
    For every JSON file:
    - **Extract Metadata:** The program reads the JSON file to retrieve the name of the associated file and its original creation date.  
-   - **Handle Naming Exceptions:** Google often shortens filenames or does not add parentheses like `(1)` to the name of the file, to which JSON file refers. The program resolves these issues to accurately match files.  
+   - **Handle Naming Exceptions:** Google often shortens filenames or does not add parentheses like `(1)` to the name of the file to which the JSON file refers. The program resolves these issues to accurately match files.  
    - **Copy & Modify Files:**  
      - Matched files are copied into a subfolder named by their year of creation (e.g., `Photos from 2008`).  
      - Creation and modification dates are corrected.  
@@ -251,13 +337,13 @@ You should not add suffixes, if you do not have problems with a lot of **unproce
    After processing JSONs, the program compares the list of all files with the list of processed files. Any difference is saved as unprocessed files.  
 
 5. **Copy Unprocessed Files:**  
-   Any unmatched files and JSONs are copied to the `unprocessed` folder inside `ProcessedPhotos` for review.
+   Any unmatched files and JSONs are copied to the `Unprocessed` folder inside `ProcessedPhotos` for review.
 
 6. **Save Logs:**  
    Information about all operations is saved in a `logs.txt` file that includes:  
-   - **Processed Files:** Original path, new path, name, path to source json and time processed.
+   - **Processed Files:** Original path, new path, name, path to source JSON and time processed.
    - **Unprocessed Files:** Original path, new path, and name.  
-   - **Unprocessed JSONs:** Original path, new path, name of the file they are refered to, time processed.
+   - **Unprocessed JSONs:** Original path, new path, name of the file they are referred to, time processed.
 
 ---
 
@@ -300,7 +386,9 @@ If you encounter issues or have questions, feel free to:
 
 ## 🔧 Already Solved Issues
 
-- If processed folder contained any unrelated `.json`s, program crashed. Now it is solved.
+- If the processed folder contained any unrelated `.json` files, the program would crash. This is now resolved.
+- Missing `UTF-8` encoding when opening log files could cause the program to crash.
+- Numbers in brackets worked incorrectly with suffixes, which led to some files not being found.
 
 ---
 
