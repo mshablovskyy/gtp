@@ -1,6 +1,6 @@
 # Google Takeout Processor (GTP)
 
-Google Takeout Processor (GTP) is a utility designed to help you organize Google Photos data from Google Takeout archives quickly and effectively. Whether you're frustrated with scattered files or incorrect dates, this tool provides a solution that automates sorting, updates file attributes, and simplifies your workflow.
+Google Takeout Processor (GTP) is a utility designed to help you restore original creation and modification dates of Google Photos data from Google Takeout archives quickly and effectively. Whether you're frustrated with scattered files or incorrect dates, this tool provides a solution that automates sorting, updates file attributes, and simplifies your workflow.
 
 ---
 
