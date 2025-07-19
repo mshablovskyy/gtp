@@ -18,7 +18,7 @@ When downloading your Google Photos data via Google Takeout, you may encounter s
 
 This utility solves these problems:
 
-- **Organizes Your Photos by Year:** Photos are organized into folders like "Photos from 2008," based on their original creation date.
+- **Organizes Your Photos as You chose on the Google Takeout page:** Photos are organized into folders like "Photos from 2008", into folders with album names, etc.
 - **Corrects File Attributes:** Updates the creation and modification dates of files to match the timestamps from their metadata.
 - **Manages Unprocessed Files:** Automatically relocates unmatched or unprocessable files to an "Unprocessed" folder for manual review.
 - **Generates Logs:** Creates a `logs.txt` file summarizing the operations for processed and unprocessed files.
@@ -108,8 +108,8 @@ Enter path to your folder with takeouts:
 
 Once the program finishes processing:
 
-1. A new folder, **ProcessedPhotos**, will appear next to the folder you provided. This folder will include:
-   - A `Processed` folder containing subfolders organized by year, e.g., `Photos from 2008`, `Photos from 2023`, etc.
+1. A new folder, **gtpOutput**, will appear next to the folder you provided. This folder will include:
+   - A `Processed` folder containing subfolders organized as Google Takeout organised, e.g., `Photos from 2008`, `Sea 2023`, etc.
    - An `Unprocessed` folder containing files and metadata that couldn't be matched or processed.
    - A `logs.txt` file summarizing:
      - Processed files with updated attributes.
@@ -156,8 +156,10 @@ More details can be found in the README file.
 Git repository for this project: https://github.com/mshablovskyy/gtp.git
 
 optional arguments:
-  -h, --help            show this help message and exit
-  -p PATH, --path PATH  The full path to the repository containing Takeout folders
+  -h, --help                  show this help message and exit
+  -p PATH, --path PATH        The full path to the repository containing Takeout folders
+  -d DESTINATION, --destination DESTINATION 
+                              The directory where the processed files will be saved
   -s SUFFIX, --suffix SUFFIX  Additional suffixes you want to add
 ```
 
@@ -167,7 +169,9 @@ optional arguments:
 
 - **`-p <path>` or `--path <path>`** - Argument which must be followed by the path to the directory with all takeouts. Takes only one argument, is mandatory, but if not given, wizard setup mode asks `<path>` again.
 
-- **`-s <suffix>` or `--suffix <suffix>`** - Argument which uses the "append" principle and takes only one argument. By default, it is set to `["", "-edited"]`. To add multiple suffixes, the argument has to be specified separately for each value. Example:
+- **`-d <destination>` or `--destination <destination>`** - Argument which must be followed by the path to the directory where you want to have processed files. Takes only one argument, is **not** mandatory, if not given, folder `gtpOutput` will be created in the same directory as the folder you provided as `<path>`
+
+- **`-s <suffix>` or `--suffix <suffix>`** - Argument which uses the "append" principle and can be specified multiple times to add multiple suffixes. By default, it is set to `["", "-edited"]`. To add multiple suffixes, the argument has to be specified separately for each value. Example:
   
   - ```bash
     gtp.py --path /Users/photolover/my-takeouts -s "-stickers" -s "-connect"
@@ -321,14 +325,14 @@ It is better just to do it as described, spend 2 more minutes, but be confident 
    - **Other Files** (media files like `.jpg`, `.png`, etc.).
 
 2. **Create Output Folder:**  
-   A new folder named `ProcessedPhotos` is created next to the input folder to store organized data.
+   A new folder named `gtpOutput` is created in the destination directory, or in the same directory, as the input folder if destination wasn't provided, to store organized data. All processed files are stored in `Processed` folder.
 
 3. **Process JSON Files:**  
    For every JSON file:
    - **Extract Metadata:** The program reads the JSON file to retrieve the name of the associated file and its original creation date.  
    - **Handle Naming Exceptions:** Google often shortens filenames or does not add parentheses like `(1)` to the name of the file to which the JSON file refers. The program resolves these issues to accurately match files.  
    - **Copy & Modify Files:**  
-     - Matched files are copied into a subfolder named by their year of creation (e.g., `Photos from 2008`).  
+     - Matched files are copied into a subfolder named by folder they were originaly in - it could album name, something like `Photos from 2008`, etc.  
      - Creation and modification dates are corrected.  
      - Matched files are added to the list of processed files.  
    - **Unmatched JSONs:** If no corresponding file is found, the JSON is added to the list of unprocessed JSONs.
@@ -337,13 +341,15 @@ It is better just to do it as described, spend 2 more minutes, but be confident 
    After processing JSONs, the program compares the list of all files with the list of processed files. Any difference is saved as unprocessed files.  
 
 5. **Copy Unprocessed Files:**  
-   Any unmatched files and JSONs are copied to the `Unprocessed` folder inside `ProcessedPhotos` for review.
+   Any unmatched files and JSONs are copied to the `Unprocessed` folder inside `gtpOutput` for review.
 
 6. **Save Logs:**  
    Information about all operations is saved in a `logs.txt` file that includes:  
    - **Processed Files:** Original path, new path, name, path to source JSON and time processed.
    - **Unprocessed Files:** Original path, new path, and name.  
    - **Unprocessed JSONs:** Original path, new path, name of the file they are referred to, time processed.
+
+### ❗️ Script does not modify original files!
 
 ---
 
@@ -360,6 +366,15 @@ Files and metadata may fail to match for several reasons:
 
 3. **Missing JSON:**  
    A file might lack a corresponding JSON file entirely, preventing processing.
+
+4. **Album JSON:**
+   Albums also have their own `.json` files, I am not sure why it is needed, but the script ignores it. Example of content in such file:
+
+   ```
+   {
+     "title": "TripMountains"
+   }
+   ```
 
 In all such cases, files and JSONs are copied to the `unprocessed` folder for manual review.
 
@@ -380,7 +395,16 @@ At the end of execution, you’ll see:
 If you encounter issues or have questions, feel free to:
 
 - Open an [issue](https://github.com/mshablovskyy/gtp/issues) on GitHub.
-- Contact me
+- Contact [me](https://github.com/mshablovskyy).
+
+---
+
+## 🛠️ Version 2.0 changes
+
+- Added destination argument.
+- Added sorting by albums.
+- Prevented rewriting files with same names - now numbers like `(1)` are added.
+- Changed logic how script looks for the files.
 
 ---
 
