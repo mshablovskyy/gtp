@@ -24,19 +24,35 @@ def exists(path): # check if path exists
     if path:
         return os.path.exists(path)
     else: return False
+    
+def get_unique_path(path, is_dir = False): # get unique path, to directory or file, if path exists, add number to it
+    if is_dir:
+        if not os.path.isdir(path):
+            return path
+        else:
+            n = 1
+            while os.path.isdir(f"{path}({n})"):
+                n += 1
+            path = f"{path}({n})"
+        return path
+    
+    if not is_dir:
+        if not os.path.isfile(path):
+            return path
+        else:
+            path, ext = os.path.splitext(path) # split path and extension to add number in the end of the filename before extension
+            n = 1
+            while os.path.isfile(f"{path}({n}){ext}"):
+                n += 1
+            path = f"{path}({n}){ext}"
+        return path
 
 def checkout_dir(path, onlynew = False): # check if directory exists, if not, create new. onlynew forces to create new repository in any case. Return is needed to give path to the new repository.
     if not os.path.isdir(path) and not onlynew:
-        os.mkdir(path)
+        os.makedirs(path)
     elif onlynew:
-        if not os.path.isdir(path):
-            os.mkdir(path)
-        else:
-            n = 1
-            while os.path.isdir(f"{path} {n}"):
-                n += 1
-            path = f"{path} {n}"
-            os.mkdir(path)
+        path = get_unique_path(path, is_dir=True)
+        os.makedirs(path)
     return path
 
 def get_file_names(path): # get all files from all folders inside directory given and return them in structured form.
@@ -51,8 +67,9 @@ def get_file_names(path): # get all files from all folders inside directory give
                 jsons.append(os.path.join(dir_cont[0], file))
             else:
                 files.append({
-                    "filename": file,
-                    "filepath": os.path.join(dir_cont[0], file)
+                    "filename":  file,
+                    "filepath":  os.path.join(dir_cont[0], file),
+                    "albumname": get_album_name(os.path.join(dir_cont[0], file))
                 })
     return jsons, files
 
@@ -84,12 +101,15 @@ def unpack_json(path, savelogsto): # get what needed from single json file.
         log_detail(savelogsto, f"JSON file does not exist, skipping: {path}")
         return None
     
-def gener_names(filename, suffixes): # generate possible file names using suffixes provided.
+def gener_names(filename, suffixes, album): # generate possible file names using suffixes provided.
     if filename["brackets"]:
-        return [(filename["name"] + suf + filename["brackets"] + filename["extension"]) for suf in suffixes]
+        return [os.path.join(album, (filename["name"] + suf + filename["brackets"] + filename["extension"])) for suf in suffixes]
     else:
-        return [(filename["name"] + suf + filename["extension"]) for suf in suffixes]
-    
+        return [os.path.join(album, (filename["name"] + suf + filename["extension"])) for suf in suffixes]
+
+def get_album_name(filepath): # get name of the folder the file is in
+    return os.path.basename(os.path.dirname(filepath)) 
+
 def find_file(jsondata, files, suffixes): # get full path to the file, based on it's name, which was extracted from json.
     # logic is to make dictionary with sufficient data to create file name to search for, using gener_names function.
     name, ext = os.path.splitext(jsondata["title"])
@@ -105,21 +125,26 @@ def find_file(jsondata, files, suffixes): # get full path to the file, based on 
         if brackets:
             brackets = brackets[-1][:-5]
             filename["brackets"] = brackets
+            
+    album_name = get_album_name(jsondata["filepath"]) # get name of the folder the json was in from the path, to search for the file in the folder with the same name
     
     # actual search, code just looks for same filenames, based on json's data and suffixes.
-    filepath = [file for file in files if file["filename"] in gener_names(filename, suffixes)] 
+    filepath = [file for file in files if os.path.join(file["albumname"], file["filename"]) in gener_names(filename, suffixes, album_name)] 
     
     if filepath:
         return True, filepath
     else:
         return False, [{"jsonpath": jsondata["filepath"],
                        "title": jsondata["title"]}]
-    
+
 def copy_modify(file, date, copyto): # copy and change creation and modification date of the file
-    copyto = checkout_dir(os.path.join(copyto, f"Photos from {date.year}"))
     
-    new_file =  os.path.join(copyto, file["filename"])
+    copyto = checkout_dir(os.path.join(copyto, file["albumname"])) # create directory for the copied file, if it does not exist
+    
+    new_file = get_unique_path(os.path.join(copyto, file["filename"])) # get unique path to the new file, to not overwrite existing files
+    
     shutil.copy(file["filepath"], new_file)
+    
     filedate.File(new_file).set(created = date, modified = date)
     
     return new_file
@@ -129,7 +154,7 @@ def copy_unprocessed(unprocessed, saveto): # copy all files that were not return
     for file in tqdm(unprocessed, desc="Copying"):
         # log the copying of unprocessed files
         log_detail(saveto, f"Copying unprocessed file: {file['filepath']}")
-        new_file = os.path.join(saveto, checkout_dir(os.path.join(saveto, "Unprocessed")), file["filename"])
+        new_file = get_unique_path(os.path.join(saveto, checkout_dir(os.path.join(saveto, "Unprocessed")), file["filename"]))
         shutil.copy(file["filepath"], new_file)
         # log the successful copying of the unprocessed file
         log_detail(saveto, f"Successfully copied unprocessed file to: {new_file}\n")
@@ -188,7 +213,7 @@ def savelogs(saveto, processed, unprocessed, unprocessed_jsons, endtime, startda
         logfile.write(f"Started: {startdate}\n")
         logfile.write(f"Ended:   {enddate}\n")
         
-def main(path, suffixes):
+def main(path, suffixes, destination): # main function, where everything is being done
     start_time = time.time() # saving current time to return time program ran in the end
     start_date = time.strftime("%Y-%m-%d %H:%M:%S")
     
@@ -202,15 +227,21 @@ def main(path, suffixes):
         print("Sorry, path you provided does not exist")
         return
     
+    if not destination: # if destination is not provided, create destination
+        # creating new folder for all modified files
+        saveto = checkout_dir(os.path.join(os.path.dirname(path), "gtpOutput"), onlynew = True)
+    else: # if destination is provided, check if it exists, if not, create it
+        if not exists(destination):
+            print(f"Destination {destination} does not exist, creating it...")
+            checkout_dir(destination)
+        saveto = checkout_dir(os.path.join(destination, "gtpOutput"), onlynew = True)
+    
     # let people know, what you work with
     print("\nProcess started...")
     print(f"\nWorking in directory {path}")
     
     # get lists with json files and non-json files
     jsons, files = get_file_names(path)
-    
-    # creating new folder for all modified files
-    saveto = checkout_dir(os.path.join(os.path.dirname(path), "gtpOutput"), onlynew = True)
     
     # adding first line to the detailed_logs.txt file
     log_detail(saveto, f"Started processing directory: {path}\n")
@@ -221,7 +252,7 @@ def main(path, suffixes):
         jsondata = unpack_json(jsonpath, saveto)
         
         if not jsondata:
-            unprocessed_jsons.append({"filename": jsonpath[len(os.path.dirname(jsonpath))+1::],
+            unprocessed_jsons.append({"filename": os.path.basename(jsonpath),
                                       "filepath": jsonpath,
                                       "title": "Title is missing",
                                       "time": time.strftime("%Y-%m-%d %H:%M:%S")})
@@ -250,18 +281,17 @@ def main(path, suffixes):
                 # log the unprocessed JSON file
                 log_detail(saveto, f"Unprocessed JSON file, no pair found for: {file['jsonpath']}\n")
                 # add info about jsons which have not found any pair, to present it in logs
-                unprocessed_jsons.append({"filename": file["jsonpath"][len(os.path.dirname(file["jsonpath"]))+1::],
+                unprocessed_jsons.append({"filename": os.path.basename(file["jsonpath"]),
                                           "filepath": file["jsonpath"],
                                           "title": file["title"],
                                           "time": time.strftime("%Y-%m-%d %H:%M:%S")})
-    
     
     print("\nWorking with unprocessed files...")
     
     # log the processing of unprocessed files
     log_detail(saveto, f"Processing unprocessed files...\n")
     # make list of files, which have not been processed, based by list of all files and processed ones, and that save name and path separately not to extract it every time needed
-    unprocessed = [{"filename": file[len(os.path.dirname(file))+1::], "filepath": file} for file in tqdm(list(set([file["filepath"] for file in files]) - set([file["filepath"] for file in processed])), desc="Analizing")]
+    unprocessed = [{"filename": os.path.basename(file), "filepath": file} for file in tqdm(list(set([file["filepath"] for file in files]) - set([file["filepath"] for file in processed])), desc="Analizing")]
     
     print("\nFinal steps with unprocessed files...")
     # copy unprocessed jsons and files to separate folder, to not lose any file
@@ -286,7 +316,9 @@ def main(path, suffixes):
     procpath = os.path.join(saveto, "Processed")
     print(f"\nFolder with processed files:\n{procpath}")
     unprocpath = os.path.join(saveto, "Unprocessed")
-    print(f"Folder with unprocessed files:\n{unprocpath}\n")
+    print(f"Folder with unprocessed files:\n{unprocpath}")
+    print(f"Logs are saved in {saveto}/logs.txt")
+    print(f"Detailed logs are saved in {saveto}/detailed_logs.txt\n")
     
 def wizard(): # wizard mode, if user have not given the argument before running
     print("\nYou have not given arguments needed, so you have been redirected to the Wizard setup")
@@ -303,6 +335,7 @@ def parse(description): # start point of the program, where variable "path" is b
     parser = argparse.ArgumentParser(description=description, formatter_class=argparse.RawTextHelpFormatter)
     
     parser.add_argument("-p", "--path", help="The full path to the repository containing Takeout folders", type=str, default=None)
+    parser.add_argument("-d", "--destination", help="The directory where the processed files will be saved", type=str, default=None)
     parser.add_argument("-s", "--suffix", action="append", help="Additional suffixes you want to add", type=str, default=suffixes)
     
     args = parser.parse_args()
@@ -312,8 +345,9 @@ def parse(description): # start point of the program, where variable "path" is b
     else: path = args.path
     
     suffixes = args.suffix
+    destination = args.destination
     
-    main(path, suffixes)
+    main(path, suffixes, destination) # run main function with path, suffixes and destination
 
 
 if __name__ == "__main__": # run the program
