@@ -1,2 +1,7 @@
 filedate==3.0
 tqdm==4.67.1
+customtkinter>=5.2.0
+Pillow>=10.0.0
+imagehash>=4.3.0
+send2trash>=1.8.0
+pillow-heif>=0.16.0
