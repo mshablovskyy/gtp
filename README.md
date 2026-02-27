@@ -28,13 +28,13 @@ This utility solves these problems:
 
 ## 🛠️ Setup and Usage
 
-**🚨 Note:**  
+**🚨 Note:**
 The program **does not change** any source folders or files, does not delete or modify them; it strictly **copies** all processed and unprocessed files. Ensure you have sufficient free space to accommodate slightly more than the total size of the input folder!
 
 ### 1. **Prepare Your Takeout Data**
 
 - Download your Google Photos archives from Google Takeout.
-- Unpack the downloaded zip files into a single folder. This folder will be the input for the program.
+- You can leave the zip files as-is — the desktop app will extract them automatically. Alternatively, unpack them into a single folder.
 - Ensure the folder contains only Google Photos data, as unrelated files may slow down the process and will be moved into the "Unprocessed" folder.
 
 ### 2. **Install Python and Dependencies**
@@ -61,23 +61,35 @@ The program **does not change** any source folders or files, does not delete or 
   pip3 install -r requirements.txt
   ```
 
-### 3. **Run the Script**
+### 3. **Run the Application**
 
-Run the program via the terminal:
+#### Desktop GUI (Recommended)
+
+Launch the desktop app by running:
+
+```bash
+python main.py
+```
+
+This opens a graphical interface that guides you through the full workflow — see the [Desktop GUI](#-desktop-gui) section below for details.
+
+#### CLI Mode
+
+The original command-line interface is still available:
 
 - #### Windows:
 
 ```bash
-python gtp.py --path <your-path-to-unpacked-folder>
+python main.py --path <your-path-to-unpacked-folder>
 ```
 
 - #### macOS/Linux:
 
 ```bash
-python3 gtp.py --path <your-path-to-unpacked-folder>
+python3 main.py --path <your-path-to-unpacked-folder>
 ```
 
-Ensure `<your-path-to-unpacked-folder>` is enclosed in quotation marks `"`, if names of your folders contain special characters or spaces.
+You can also use `gtp.py` directly for CLI mode. Ensure `<your-path-to-unpacked-folder>` is enclosed in quotation marks `"`, if names of your folders contain special characters or spaces.
 
 ---
 
@@ -122,6 +134,33 @@ Once the program finishes processing:
 2. A terminal output summarizing:
    - The number of processed/unprocessed files.
    - The total time taken for processing.
+
+---
+
+## 🖥️ Desktop GUI
+
+The desktop GUI provides a visual, step-by-step workflow for processing your Google Takeout data and cleaning up duplicates, similar photos, and low-quality images.
+
+### Workflow
+
+The app is organized into **4 tabs** that form a sequential pipeline. Each review tab has a **"Next"** button so you can move through the steps in order, or skip any step you don't need:
+
+1. **Process** — Select your input folder (ZIPs or extracted Takeout), configure output location and suffixes, then click **Start Processing**. The app extracts ZIPs, processes metadata, and optionally runs all three scans automatically.
+
+2. **Duplicates** — Reviews exact duplicate files detected via SHA-256 hashing. The first file in each group is auto-marked **Keep** (green), the rest are marked **Delete** (red). Click **Move Marked to Trash** to clean up, then **Next: Similar Photos** to continue.
+
+3. **Similar Photos** — Reviews visually similar images detected via perceptual hashing (pHash, dHash, aHash, or wHash). Same auto-marking behavior: first image is **Keep**, rest are **Delete**. You can adjust the similarity threshold (0–20) and hash algorithm. Click **Next: Quality Review** to continue.
+
+4. **Quality Review** — Flags problematic images: blurry, very dark, overexposed, tiny, corrupt, or screenshots. Each flagged image is shown with its issue type, confidence score, and a **Keep/Delete** toggle (defaults to Delete). Filter by issue type using the checkboxes. Click **Done** to return to the Process tab.
+
+### Features
+
+- **Auto-marking**: In duplicate and similar photo groups, the first file is marked "Keep" and the rest "Delete" — just click "Move Marked to Trash" for quick cleanup.
+- **Sequential navigation**: "Next" buttons on each tab let you flow through the entire pipeline without manually switching tabs.
+- **ZIP extraction**: The Process tab can extract Google Takeout ZIP files automatically before processing.
+- **Configurable suffixes**: Handle Google's naming quirks (e.g., `-edited`) from the GUI.
+- **HEIC support**: Reads HEIC/HEIF images when `pillow-heif` is installed.
+- **Safe deletion**: Files are moved to the system trash (via `send2trash`), not permanently deleted.
 
 ---
 
@@ -413,6 +452,21 @@ If you encounter issues or have questions, feel free to:
 - If the processed folder contained any unrelated `.json` files, the program would crash. This is now resolved.
 - Missing `UTF-8` encoding when opening log files could cause the program to crash.
 - Numbers in brackets worked incorrectly with suffixes, which led to some files not being found.
+
+---
+
+## 🛠️ Version 3.0 changes
+
+- Added desktop GUI with CustomTkinter (launch with `python main.py`).
+- Full 4-step pipeline: Process, Duplicates, Similar Photos, Quality Review.
+- Duplicate detection using SHA-256 hashing with auto-mark Keep/Delete.
+- Similar photo detection using perceptual hashing (pHash/dHash/aHash/wHash) with configurable threshold.
+- Quality issue detection: blurry, dark, overexposed, tiny, corrupt, and screenshot images.
+- Sequential navigation with Next/Done buttons between review tabs.
+- Automatic ZIP extraction in the Process tab.
+- Safe deletion via system trash (`send2trash`).
+- HEIC/HEIF image support.
+- CLI mode remains fully backward compatible.
 
 ---
 
