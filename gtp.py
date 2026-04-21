@@ -336,7 +336,7 @@ def parse(description): # start point of the program, where variable "path" is b
     
     parser.add_argument("-p", "--path", help="The full path to the repository containing Takeout folders", type=str, default=None)
     parser.add_argument("-d", "--destination", help="The directory where the processed files will be saved", type=str, default=None)
-    parser.add_argument("-s", "--suffix", action="append", help="Additional suffixes you want to add", type=str, default=suffixes)
+    parser.add_argument("-s", "--suffix", action="append", help="Additional suffixes you want to add\nPlease use '-s=SUFFIX' syntax (with '='), to accept suffix text starting with '-' (e.g. '-s=-sticker')", type=str, default=suffixes)
     
     args = parser.parse_args()
         

@@ -144,6 +144,8 @@ python3 gtp.py -h
 #### Expected output:
 
 ```bash
+usage: gtp.py [-h] [-p PATH] [-d DESTINATION] [-s SUFFIX]
+
 Google Takeout Processor
 
 This program processes Google Takeout data by analyzing files in a specified folder. It identifies `.json` files for metadata (e.g., creation date, file name) and processes the corresponding files accordingly.
@@ -155,12 +157,13 @@ Processed files are copied and modified based on their metadata, while unprocess
 More details can be found in the README file.
 Git repository for this project: https://github.com/mshablovskyy/gtp.git
 
-optional arguments:
-  -h, --help                  show this help message and exit
-  -p PATH, --path PATH        The full path to the repository containing Takeout folders
-  -d DESTINATION, --destination DESTINATION 
-                              The directory where the processed files will be saved
-  -s SUFFIX, --suffix SUFFIX  Additional suffixes you want to add
+options:
+  -h, --help            show this help message and exit
+  -p, --path PATH       The full path to the repository containing Takeout folders
+  -d, --destination DESTINATION
+                        The directory where the processed files will be saved
+  -s, --suffix SUFFIX   Additional suffixes you want to add
+                        Please use '-s=SUFFIX' syntax (with '='), to accept suffix text starting with '-' (e.g. '-s=-sticker')
 ```
 
 ### Detailed explanation of every argument:
@@ -171,10 +174,10 @@ optional arguments:
 
 - **`-d <destination>` or `--destination <destination>`** - Argument which must be followed by the path to the directory where you want to have processed files. Takes only one argument, is **not** mandatory, if not given, folder `gtpOutput` will be created in the same directory as the folder you provided as `<path>`
 
-- **`-s <suffix>` or `--suffix <suffix>`** - Argument which uses the "append" principle and can be specified multiple times to add multiple suffixes. By default, it is set to `["", "-edited"]`. To add multiple suffixes, the argument has to be specified separately for each value. Example:
+- **`-s=<suffix>` or `--suffix=<suffix>`** - Argument which uses the "append" principle and can be specified multiple times to add multiple suffixes. By default, it is set to `["", "-edited"]`. To add multiple suffixes, the argument has to be specified separately for each value. Example:
   
   - ```bash
-    gtp.py --path /Users/photolover/my-takeouts -s "-stickers" -s "-connect"
+    gtp.py --path /Users/photolover/my-takeouts -s="-stickers" -s="-connect"
     ```
 
 ---
@@ -222,12 +225,12 @@ To utilize suffixes, simply pass them as arguments when running the program from
 For example:
 
 ```bash
-gtp.py -p <path> -s -sticker
+gtp.py -p <path> -s=-sticker
 ```
 
 ### Note:
 
-You should not add suffixes if you do not have problems with a lot of **unprocessed** files, or if you are not fully aware of what you are doing. It can lead to incorrect file handling or potential data loss.
+You should not add suffixes if you do not have problems with a lot of **unprocessed** files, or if you are not fully aware of what you are doing. It can lead to slower processing, incorrect file handling or potential data loss.
 
 ---
 
