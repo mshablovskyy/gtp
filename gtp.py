@@ -69,7 +69,8 @@ def get_file_names(path): # get all files from all folders inside directory give
                 files.append({
                     "filename":  file,
                     "filepath":  os.path.join(dir_cont[0], file),
-                    "albumname": get_album_name(os.path.join(dir_cont[0], file))
+                    "albumname": get_album_name(os.path.join(dir_cont[0], file)),
+                    "album_filename": os.path.join(get_album_name(os.path.join(dir_cont[0], file)), file)
                 })
     return jsons, files
 
@@ -127,9 +128,9 @@ def find_file(jsondata, files, suffixes): # get full path to the file, based on 
             filename["brackets"] = brackets
             
     album_name = get_album_name(jsondata["filepath"]) # get name of the folder the json was in from the path, to search for the file in the folder with the same name
-    
+    gener_name = gener_names(filename, suffixes, album_name)
     # actual search, code just looks for same filenames, based on json's data and suffixes.
-    filepath = [file for file in files if os.path.join(file["albumname"], file["filename"]) in gener_names(filename, suffixes, album_name)] 
+    filepath = [file for file in files if file["album_filename"] in gener_name] 
     
     if filepath:
         return True, filepath
