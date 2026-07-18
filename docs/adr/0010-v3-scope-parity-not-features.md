@@ -1,0 +1,3 @@
+# v3.0 is a behavioral rewrite, not a feature dump
+
+**3.0 cutover** delivers the v2 product promises in the new package and pipeline (Discover→Apply, Album default, Unprocessed + logs, suffix Match problem, cross-platform Capture-time restore)—not a large new feature set. Small quality fixes and cleanups that fall out of the redesign are allowed; big capabilities wait until after 3.0. **Configurable metadata is the first post-3.0 feature**, not part of cutover. **`separate.py` is dropped** as a separate product: any split/re-run helper lives in the main `gtp` CLI if still needed. GUI and PyPI publish stay out of cutover.
