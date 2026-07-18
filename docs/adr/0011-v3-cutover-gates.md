@@ -1,0 +1,3 @@
+# When rewrite/v3 may cut over to main as 3.0
+
+Cutover is allowed only when: (1) Discover→Apply works on synthetic fixtures with Processed/Unprocessed/logs, (2) pytest + ruff are green on the rewrite line, (3) the maintainer has dogfooded a real local Takeout and would choose v3 over v2, (4) README covers install/`gtp` and v2→v3 migration, (5) the maintainer explicitly approves cutover. **Not required:** exhaustive edge-case perfection or metadata/GUI/PyPI. **Is required:** v3 runs well on the same class of machines v2 did (Windows, macOS, Linux)—portable behavior, not necessarily a full CI matrix on every OS before release.
